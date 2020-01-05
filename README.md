@@ -1,3 +1,5 @@
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/gmkado/learn-to-code) 
+
 ## Welcome to GitHub Pages
 
 You can use the [editor on GitHub](https://github.com/gmkado/learn-to-code/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
