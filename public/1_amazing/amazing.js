@@ -1,9 +1,13 @@
 const mazeCanvas = document.getElementById('mazeCanvas');
 const directionLabel = document.getElementById('directions');
-const resultLabel = document.getElementById('result');
 const difficultySelection = document.getElementById('difficultySelection');
 const ctx = mazeCanvas.getContext('2d');
 let resetButton;
+let cellWidth;
+let cellHeight;
+let currentPos;
+let currentDir; 
+let directions;
 
 mazeOptions =
 {'easy':
@@ -30,15 +34,16 @@ mazeOptions =
 ],
 };
 
+let first = false;
 for(const key in mazeOptions) {
     let optionButton = document.createElement('input');
     optionButton.type = 'radio';
-    optionButton.name = 'difficulty';
+    optionButton.name = 'difficulty'; // add to radiogroup
     optionButton.addEventListener('click', (event)=>{
         maze = mazeOptions[key];
         resetAndRunGame();
-    });
-
+    });    
+    
     // ignore arrow keys
     optionButton.addEventListener('keydown', (evt)=>{
         if(evt.key === 'ArrowDown' ||
@@ -55,16 +60,11 @@ for(const key in mazeOptions) {
 
     difficultySelection.appendChild(optionButton);
     difficultySelection.appendChild(optionLabel);
+            
 }
 
-
-let cellWidth;
-let cellHeight;
-let currentPos;
-let currentDir; 
-let directions;
-
-// resetAndRunGame();
+//default to first maze
+difficultySelection.firstElementChild.click();
 
 // direction is an angle in rad with 0 pointing right, position are [x, y]
 function resetAndRunGame() {
@@ -72,13 +72,11 @@ function resetAndRunGame() {
     currentDir = 0;
     directions = [];
     directionLabel.textContent = 'Press arrow keys and [enter] when you\'re ready';
-    resultLabel.textContent = '';
-    resultLabel.style.backgroundColor = 'white';
     cellWidth = Math.floor(mazeCanvas.width / maze[0].length);
     cellHeight = Math.floor(mazeCanvas.height / maze.length);
     if(resetButton) {
         document.body.removeChild(resetButton);
-        resetButton = null;        
+        resetButton = null;       
     }
     drawCurrentStep();
     listenForDirections();
@@ -145,25 +143,24 @@ function runSingleStep() {
 }
 
 function onWin(){
-    resultLabel.style.backgroundColor = 'green';
-    resultLabel.textContent = 'Congrats, you win!';
-
-    addResetButton();
+    addResetButton('green', 'Congrats, you win!');
 }
 
-function addResetButton() {
+function onLose(){
+    addResetButton('red', 'Sorry, you lost!');
+}
+
+function addResetButton(color, text) {
     resetButton = document.createElement('button');
-    resetButton.textContent = 'Play again';
+    resetButton.textContent = text + '  Click to play again';
+    resetButton.style.backgroundColor = color;
+    resetButton.id = 'result';
+
     resetButton.addEventListener('click', resetAndRunGame);
     document.body.append(resetButton);
 }
 
-function onLose(){
-    resultLabel.style.backgroundColor = 'red';
-    resultLabel.textContent = 'Sorry, you lost!';
 
-    addResetButton();
-}
 
 // game is over if current pos is outside the maze limits, in a wall, or at the end
 function gameOver(onWin, onLose){
