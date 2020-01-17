@@ -75,7 +75,7 @@ function resetAndRunGame() {
     cellWidth = Math.floor(mazeCanvas.width / maze[0].length);
     cellHeight = Math.floor(mazeCanvas.height / maze.length);
     if(resetButton) {
-        document.body.removeChild(resetButton);
+        resetButton.parentNode.removeChild(resetButton);
         resetButton = null;       
     }
     drawCurrentStep();
@@ -157,7 +157,8 @@ function addResetButton(color, text) {
     resetButton.id = 'result';
 
     resetButton.addEventListener('click', resetAndRunGame);
-    document.body.append(resetButton);
+    let contentSection = document.body.getElementsByClassName('content');
+    contentSection[0].appendChild(resetButton);
 }
 
 

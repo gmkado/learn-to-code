@@ -1,0 +1,50 @@
+.ideacard {
+  display: block;
+  background: white;
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 4px 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+/* Create two equal columns that floats next to each other */
+.column {
+  float: left;
+  margin: 10px
+}
+
+.column#voting{
+  width:10%; 
+  height:100%; 
+}
+
+.column#content{
+  width:90%
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.vote {
+  display: inline-block;
+  overflow: hidden;
+  width: 40px;
+  height: 25px;
+  cursor: pointer;
+  background: url('http://i.stack.imgur.com/iqN2k.png');
+  background-position: 0 -25px;
+} 
+
+
+.vote.on {
+  background-position: 0 2px;
+}
+
+#downvote {
+  transform: rotate(180deg);
+}
