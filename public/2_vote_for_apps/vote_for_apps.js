@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function() {
     .orderBy("netVotes", "desc")
       .onSnapshot(querySnapshot => {
         // clear existing idea cards
-        let ideacards = document.getElementsByClassName('ideacard');
+        let ideacards = document.getElementsByClassName('idea-card');
         while(ideacards[0]) {
             ideacards[0].parentNode.removeChild(ideacards[0]);
         }
@@ -65,20 +65,20 @@ function displayAppIdea(doc) {
     let ideaTemplate = document.getElementsByTagName('template')[0];
     let ideaCard = ideaTemplate.content.cloneNode(true);
     
-    let voteColumn = ideaCard.getElementById('idea_voting')
-    let contentColumn = ideaCard.getElementById('idea_content')
-    let upvoteBtn = voteColumn.querySelector('#upvote')
-    let downvoteBtn = voteColumn.querySelector('#downvote')    
-    let voteCount = voteColumn.querySelector('#votecount')    
+    let voteColumn = ideaCard.querySelector('.idea-card__voting')
+    let contentColumn = ideaCard.querySelector('.idea-card__content')
+    let upvoteBtn = voteColumn.querySelector('.idea-card__upvote')
+    let downvoteBtn = voteColumn.querySelector('.idea-card__downvote')    
+    let voteCount = voteColumn.querySelector('.idea-card__count')    
 
     // check if our list contains the current client id
     let upvoteList = doc.data().upvotes ||[];
     let downvoteList = doc.data().downvotes||[];
     if(upvoteList.includes(clientId)) {
-        upvoteBtn.classList.toggle('on');
+        upvoteBtn.classList.toggle('idea-card__vote--on');
     }
     if(downvoteList.includes(clientId)) {
-        downvoteBtn.classList.toggle('on');
+        downvoteBtn.classList.toggle('idea-card__vote--on');
     }    
 
     let clickhandler = (event, isUpvote) => {

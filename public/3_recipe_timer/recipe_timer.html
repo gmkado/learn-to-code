@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />  
+  <script defer src="recipe_timer.js"></script>
+  <link rel="stylesheet" href="../stylesheets/main.css" media="screen" />
+</head>
+<body>
+  <header>
+    <nav>
+      <a id="home" href="../index.html">Home</a>
+    </nav>
+  </header>
+  <section class="instructions">
+    <h1>Recipe Timer</h1>
+    <h2>Instructions:</h2>
+    <ol>
+      <li>Add recipe steps with times</li>
+      <li>Click start</li>
+    </ol>
+  </section>
+    <input
+      id="addRecipe"
+      type="button"
+      value="Add recipe"      
+    />
+    <input
+      id="startTimer"
+      type="button"
+      value="Start timer"
+      onclick="startTimer()"
+    />
+    <div id="recipes" class="recipes row center-xs">
+      <!-- Recipes go here -->
+    </div>
+
+    <template id="recipeTemplate">
+      <div class="recipe col">
+        <h3 class="recipe__title row"></h3>
+        <input class="recipe__add-step" type="button" value="Add step"/>
+        <input class="recipe__delete-recipe" type="button" value="Delete recipe" onclick="deleteRecipe(event)"/>
+        <p class="recipe__total-time"></p class="recipe__total-time">
+        <div class="recipe__steps col"></div>
+      </div>
+    </template>
+
+    <template id="stepTemplate">
+      <div class="step row flex-column">
+        <textarea class = "step__text row"></textarea>
+        <form class="step__time row">
+          <input type="number" class="step__time-input col" id="step__time" min="1" step="1" required="true"/>
+          <label type="number" for="step__time-label col">min</label>
+        </form>
+      </div>
+    </template>
+
+    <script>
+      
+    </script>
+</body>
