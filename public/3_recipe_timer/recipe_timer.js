@@ -1,29 +1,51 @@
 // See https://www.taniarascia.com/javascript-mvc-todo-app/
-class RecipeModel {
+class RecipeModel{
   constructor() {
-    this.recipes = [];
+    this.steps = [];
   }
 
-  addRecipe = () => {
-    let newrecipe = { steps: [] };
+  addStep() {
+    let newstep = { instruction: "", time: 0 };
+    this.steps.push(newstep);
+  }
+
+  // Loop through all the steps and sum the time
+  getTotalTime(){
+    return this.steps.map(s => s.time).reduce((t1, t2) => t1 + t2, 0);
+  }
+}
+
+class RecipesModel {
+  constructor() {
+    this.recipes = [];
+    this.currentTime = 0;
+  }
+
+  addRecipe () {
+    let newrecipe = new RecipeModel();
     this.recipes.push(newrecipe);
     this.handleChange();
-  };
+  }
 
-  deleteRecipe = recipe => {
+  deleteRecipe (recipe) {
     this.recipes = this.arrayRemove(this.recipes, recipe);
     this.handleChange();
-  };
+  }
 
-  addStep = recipe => {
-    let newstep = { instruction: "", time: 0 };
-    recipe.steps.push(newstep);
+  addStep (recipe) {
+    recipe.addStep();
     this.handleChange();
-  };
+  }
 
-  bindOnChange = handler => {
+  // total time is the max recipe time
+  getTotalTime() {
+    // ... is spread syntax https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax
+    return Math.max(...this.recipes.map(r => r.getTotalTime()));
+  }
+
+  bindOnChange(handler) {
     this.handleChange = handler;
-  };
+  }  
 
   // utility function to remove element from array
   arrayRemove(arr, value) {
@@ -40,24 +62,55 @@ class RecipeView {
     this.addRecipeButton = document.getElementById("addRecipe");
     this.recipeTemplate = document.getElementById("recipeTemplate");
     this.stepTemplate = document.getElementById("stepTemplate");
-    this.startTimeButton = document.getElementById("startTimer");    
+    this.startTimeButton = document.getElementById("startTimer");
+    this._cooking = false;
   }
 
-  displayRecipes = recipes => {
+  get cooking(){
+    return this._cooking;
+  }
+
+  // cooking property
+  set cooking(value){
+    this._cooking = value;
+    if(value) {
+      // cooking has started
+    }else{
+      // cooking has stopped
+    }
+  }
+
+  updateStartText(totalTime) {
+    this.startTimeButton.value = `Start timer (${totalTime} min)`;
+  }
+
+  updateStopText(currentTime) {
+    this.startTimeButton.value = `Stop timer (${currentTime} sec remaining)`;
+  }
+
+  displayRecipes(model) {
     // Delete all nodes
     while (this.recipesView.firstChild) {
       this.recipesView.removeChild(this.recipesView.firstChild);
     }
 
-    recipes.forEach(r => {
-      this.recipesView.appendChild(this.getRecipeView(r));
-    });
+    var recipesTimeUpdater = ()=>{
+      this.updateStartText(model.getTotalTime());
+    }
+    model.recipes.forEach(r => {
+      this.recipesView.appendChild(this.getRecipeView(r, recipesTimeUpdater));
+    });    
   };
 
-  getRecipeView(recipe) {
+  getRecipeView(recipe, recipesTimeUpdater) {
     let recipeView = recipeTemplate.content.cloneNode(true);
     let recipeStepsView = recipeView.querySelector(".recipe__steps");
-    recipeView.querySelector(".recipe__title").textContent = "Recipe";
+    let recipeTitleView = recipeView.querySelector(".recipe__title");
+    
+    var recipeTimeUpdater = () => {
+      recipeTitleView.textContent = `Recipe (${recipe.getTotalTime()} min)`;
+      recipesTimeUpdater();
+    }
 
     // the handler for this click event is set in bindAddStep
     let addStepButton = recipeView.querySelector(".recipe__add-step");
@@ -73,17 +126,28 @@ class RecipeView {
 
     // add the step views
     recipe.steps.forEach(s => {
-      recipeStepsView.appendChild(this.getStepView(s));
+      recipeStepsView.appendChild(this.getStepView(s, recipeTimeUpdater));
     });
 
     return recipeView;
   }
 
-  getStepView(step) {
+  getStepView(step, recipeTimeUpdater) {
     let stepView = stepTemplate.content.cloneNode(true);
-    stepView.querySelector(".step__text").textContent = step.instruction;
-    stepView.querySelector(".step__time-input").textContent = step.time;
+    let stepTextInput = stepView.querySelector(".step__text");
+    let stepTimeInput = stepView.querySelector(".step__time-input");
+    
+    stepTextInput.textContent = step.instruction;
+    stepTimeInput.value = step.time;
 
+    stepTextInput.onchange = ()=>{
+      step.instruction = stepTextInput.value;      
+    };
+
+    stepTimeInput.onchange = ()=>{
+      step.time = stepTimeInput.valueAsNumber;
+      recipeTimeUpdater();
+    };
     return stepView;
   }
 
@@ -101,7 +165,7 @@ class RecipeView {
     this.addStepHandler = handler;
   }
 
-  bindStartTimer(handler) {
+  bindStartStopTimer(handler) {
     this.startTimeButton.addEventListener('click', event => {
       handler();
     });
@@ -116,16 +180,17 @@ class RecipeView {
   }
 }
 
-class RecipeController {
+class RecipeController {  
   constructor(model, view) {
     this.model = model;
     this.view = view;
+    this.cooking = false;
 
     model.bindOnChange(this.handleModelChange);
     view.bindAddRecipe(this.handleAddRecipe);
     view.bindAddStep(this.handleAddStep);
     view.bindDeleteRecipe(this.handleDeleteRecipe);
-    view.bindStartTimer(this.handleStartTime);
+    view.bindStartStopTimer(this.handleStartStopTime);
   }
 
   // we need to use arrow key to get the appropriate 'this'
@@ -143,47 +208,29 @@ class RecipeController {
   };
 
   handleModelChange = () => {
-    this.view.displayRecipes(this.model.recipes);
+    this.view.displayRecipes(this.model);
   };
 
-  handleStartTime = () =>{
-    if(this.view.isValid()){
-      // TODO: finish moving everything in here
-    }
+  handleStartStopTime = () =>{
+    if(this.view.cooking) {
+      this.view.cooking = false;
+      clearInterval(this.timerId);
+      this.view.updateStartText(this.model.getTotalTime());
+    }else{
+      // Check that input fields are valid before starting
+      if(this.view.isValid()){
+        this.view.cooking = true;
+        this.currentTimeSec = this.model.getTotalTime() * 60;
+        this.timerId = setInterval(this.onTick, 1000); 
+      }
+    }    
+  }
+
+  onTick = () => {
+    // update the time
+    this.currentTimeSec--;
+    this.view.updateStopText(this.currentTimeSec);
   }
 }
 
-const app = new RecipeController(new RecipeModel(), new RecipeView());
-
-//#region button callbacks
-
-function startTimer() {
-  
-  if (isValid) {
-    // add up all the times and get a time-remaining
-    let recipes = document
-      .querySelector(".recipes")
-      .querySelectorAll(".recipe");
-
-    // list of step times for each recipe
-    let recipeTimeMap = {};
-    recipes.forEach(recipe => {
-      // add up all the steps in the recipe
-      recipeTimeMap[recipe] = sumOfStepTimes(recipe);
-
-      // display the recipe
-      recipe.querySelector(
-        ".recipe__total-time"
-      ).textContent = `Total time ${recipeTimeMap[recipe]}`;
-    });
-
-    console.log(Math.max(recipeTimeMap.values()));
-  }
-}
-
-function sumOfStepTimes(recipe) {
-  return Array.from(recipe.querySelectorAll(".step__time-input"))
-    .map(stepTime => parseInt(stepTime.value))
-    .reduce((t1, t2) => t1 + t2, 0);
-}
-//#endregion
+const app = new RecipeController(new RecipesModel(), new RecipeView());
