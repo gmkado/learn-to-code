@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1" />  
-  <script defer src="recipe_timer.js"></script>
+  <script defer src="RecipeModel.js"></script>
+  <script defer src="RecipeView.js"></script>
+  <script defer src="RecipeController.js"></script>
   <link rel="stylesheet" href="../stylesheets/main.css" media="screen" />
 </head>
 <body>
@@ -37,7 +39,6 @@
         <h3 class="recipe__title row"></h3>
         <input class="recipe__add-step" type="button" value="Add step"/>
         <input class="recipe__delete-recipe" type="button" value="Delete recipe"/>
-        <p class="recipe__total-time"></p class="recipe__total-time">
         <div class="recipe__steps col"></div>
       </div>
     </template>
@@ -47,7 +48,7 @@
         <textarea class = "step__text row"></textarea>
         <form class="step__time row">
           <input type="number" class="step__time-input col" id="step__time" min="1" step="1" required="true"/>
-          <label type="number" for="step__time-label col">min</label>
+          <label for="step__time-label col">min</label>
         </form>
       </div>
     </template>
