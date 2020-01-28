@@ -2,6 +2,7 @@
 class RecipeModel{
   constructor() {
     this.steps = [];
+    this.currentIndex = 0; // start at beginning of list
   }
 
   addStep() {
@@ -15,8 +16,19 @@ class RecipeModel{
   }
 
   decrementCurrentStep() {
-    // TODO: find the earliest step with nonzero timeleft and decrement it
-    
+    if(this.currentIndex < this.steps.length) {
+      let currentStep = this.steps[this.currentIndex];
+      if(currentStep.timeLeftSec > 0) {
+        currentStep.timeLeftSec--;
+      }else{
+        this.currentIndex ++;
+        // recursively call this function to check the index and time left on this step
+        this.decrementCurrentStep();
+      }
+    }else{
+      this.done = true;
+    }
+
   }
 }
 
@@ -60,12 +72,11 @@ class RecipesModel {
 
   updateCurrentTime(currentCountdownSec) {
     this.recipes.forEach(r => {
+      if (r.done) return;
       // translate to elapsed time in the recipe
       let recipeTimeElapsed = r.getTotalSeconds() - currentCountdownSec;
-      if(recipeTimeElapsed < 0){
-        // we havent gotten here yet, so still counting down...
-      }else{
-        r.decrementCurrentStep()
+      if(recipeTimeElapsed > 0){
+        r.decrementCurrentStep();
       }
     });
 
