@@ -69,9 +69,9 @@ function displayAppIdea(doc) {
     let contentColumn = ideaCard.querySelector('.idea-card__content')
     let upvoteBtn = voteColumn.querySelector('.idea-card__upvote')
     let downvoteBtn = voteColumn.querySelector('.idea-card__downvote')    
-    let voteCount = voteColumn.querySelector('.idea-card__count')    
+    let voteCount = voteColumn.querySelector('.idea-card__count') 
 
-    // check if our list contains the current client id
+    // check if our list contains the current client id so we prevent vote spamming
     let upvoteList = doc.data().upvotes ||[];
     let downvoteList = doc.data().downvotes||[];
     if(upvoteList.includes(clientId)) {
@@ -80,7 +80,6 @@ function displayAppIdea(doc) {
     if(downvoteList.includes(clientId)) {
         downvoteBtn.classList.toggle('idea-card__vote--on');
     }    
-
     let clickhandler = (event, isUpvote) => {
         if(clientId) {
             voteList = isUpvote ? upvoteList : downvoteList;
@@ -107,12 +106,32 @@ function displayAppIdea(doc) {
         }
     };
 
+    // populate the content fields
+    let urlLink = contentColumn.querySelector('.idea-card__url')
+    let nameText = contentColumn.querySelector('#name');
+    let descriptionText = contentColumn.querySelector('#description');
+
     upvoteBtn.addEventListener('click', (event)=> clickhandler(event, true));
     downvoteBtn.addEventListener('click', (event)=> clickhandler(event, false));       
     voteCount.textContent = doc.data().netVotes||0;
 
-    contentColumn.querySelector('#name').textContent = doc.data().name;
-    contentColumn.querySelector('#description').textContent = doc.data().description;
+    nameText.textContent = doc.data().name;
+    descriptionText.textContent = doc.data().description;
     
+    // if the doc has a url field that means we've made this idea
+    ideaUrl = doc.data().url;
+    if (ideaUrl) {
+        urlLink.style.display='';
+        urlLink.href = ideaUrl;
+        urlLink.textContent = ideaUrl;
+        
+        // also display background as gray so we don't focus on it
+        doneColor = 'lightgray';
+        ideaCard.firstElementChild.style.background = doneColor;
+        
+        // lets also append a checkmark to the name
+        nameText.textContent = '✓' + nameText.textContent;
+    }
+
     document.body.appendChild(ideaCard);
 }

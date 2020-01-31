@@ -599,12 +599,25 @@ body {
   margin: 4px 2px;
 }
 .step__time-input {
-  max-width: 75%;
+  text-align: right;
+  max-width: 50%;
   padding: 0px;
 }
 
 .step__time-label {
-  max-width: 25%;
+  max-width: 30%;
+}
+
+.step__delete {
+  max-width: 10%;
+}
+
+.step__move-up {
+  max-width: 10%;
+}
+
+.step__move-down {
+  max-width: 10%;
 }
 
 .recipe {

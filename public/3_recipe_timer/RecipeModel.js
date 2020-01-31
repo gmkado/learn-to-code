@@ -1,13 +1,54 @@
 // See https://www.taniarascia.com/javascript-mvc-todo-app/
 class RecipeModel{
-  constructor() {
+  constructor(changeHandler) {
     this.steps = [];
-    this.currentIndex = 0; // start at beginning of list
+    this.handleChange = changeHandler;
+    this.reset();
+  }
+  
+  addStep(instruction ='', timeSec = '') {
+    let newstep = {recipe: this, instruction: instruction, timeSec: timeSec, timeLeftSec:timeSec};
+    this.steps.push(newstep);
+    this.handleChange();
+    return newstep;
+  }
+  
+  deleteStep(step){    
+    this.steps = this.steps.filter(s=> s!=step);
+    this.handleChange();
   }
 
-  addStep() {
-    let newstep = { instruction: "", timeSec: 0, timeLeftSec:0};
-    this.steps.push(newstep);
+  moveUp(step) {
+    let index = this.steps.indexOf(step);
+    if(index == 0) {
+      return;  // can't move up, we're at the top
+    }
+
+    let temp = this.steps[index - 1];
+    this.steps[index - 1] = step;
+    this.steps[index] = temp;
+    this.handleChange();
+  }
+
+  moveDown(step) {
+    let index = this.steps.indexOf(step);
+    if(index == this.steps.length - 1) {
+      return;  // can't move down, we're at the bottom
+    }
+
+    let temp = this.steps[index + 1];
+    this.steps[index + 1] = step;
+    this.steps[index] = temp;
+    this.handleChange();
+  }
+
+  reset(){
+    this.steps.forEach(step => {
+      step.timeLeftSec = step.timeSec;
+      step.isComplete = false;
+      step.inProgress = false;
+    });
+    this.currentIndex = 0; // start at beginning of list
   }
 
   // Loop through all the steps and sum the time
@@ -16,46 +57,39 @@ class RecipeModel{
   }
 
   decrementCurrentStep() {
-    if(this.currentIndex < this.steps.length) {
-      let currentStep = this.steps[this.currentIndex];
-      if(currentStep.timeLeftSec > 0) {
-        currentStep.timeLeftSec--;
-      }else{
-        this.currentIndex ++;
-        // recursively call this function to check the index and time left on this step
-        this.decrementCurrentStep();
-      }
-    }else{
-      this.done = true;
+    if(this.currentIndex > this.steps.length) {
+      return;
     }
 
+    let currentStep = this.steps[this.currentIndex];
+    if(currentStep.timeLeftSec > 0) {
+      currentStep.inProgress = true;
+      currentStep.timeLeftSec--;
+    }else{
+      currentStep.inProgress = false;
+      currentStep.isComplete = true;
+      this.currentIndex ++;
+      // recursively call this function to check the index and time left on this step
+      this.decrementCurrentStep();
+    }   
   }
 }
 
 class RecipesModel {
-  constructor() {
-    let sampleRecipe = new RecipeModel();
-    sampleRecipe.steps = [
-      { instruction: "abc", timeSec: 60, timeLeftSec: 60, isComplete:false},
-      { instruction: "def", timeSec: 60, timeLeftSec: 60, isComplete:false}
-    ];
-    this.recipes = [sampleRecipe];      
+  constructor() {    
+    this.recipes = [];      
     this.currentTime = 0;
   }
 
   addRecipe () {
-    let newrecipe = new RecipeModel();
+    let newrecipe = new RecipeModel(this.handleChange);
     this.recipes.push(newrecipe);
     this.handleChange();
+    return newrecipe;
   }
 
   deleteRecipe (recipe) {
     this.recipes = this.arrayRemove(this.recipes, recipe);
-    this.handleChange();
-  }
-
-  addStep (recipe) {
-    recipe.addStep();
     this.handleChange();
   }
 
@@ -70,9 +104,8 @@ class RecipesModel {
   }  
 
 
-  updateCurrentTime(currentCountdownSec) {
+  updateCurrentTime(currentCountdownSec) {    
     this.recipes.forEach(r => {
-      if (r.done) return;
       // translate to elapsed time in the recipe
       let recipeTimeElapsed = r.getTotalSeconds() - currentCountdownSec;
       if(recipeTimeElapsed > 0){
@@ -80,6 +113,13 @@ class RecipesModel {
       }
     });
 
+    this.handleChange();
+  }
+
+  reset() {
+    this.recipes.forEach(recipe => {
+      recipe.reset();
+    });
     this.handleChange();
   }
 

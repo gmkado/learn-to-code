@@ -8,3 +8,6 @@ Use ```firebase deploy``` in CLI
 https://firebase.google.com/docs/functions/local-emulator
 ```firebase emulators:start```
 ```firebase serve```
+
+## To pre-process style sheets
+sass --watch .\public\stylesheets\main.scss .\public\stylesheets\main.css
